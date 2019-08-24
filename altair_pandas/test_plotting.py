@@ -64,3 +64,19 @@ def test_dataframe_hist(dataframe, with_plotting_backend):
     assert 'field' not in spec['encoding']['y']
     assert spec['encoding']['color']['field'] == 'column'
     assert spec['transform'][0]['fold'] == ['x', 'y']
+
+
+def test_series_box(series, with_plotting_backend):
+    chart = series.plot.box()
+    spec = chart.to_dict()
+    assert spec['mark'] == 'boxplot'
+    assert spec['encoding']['x']['field'] == 'column'
+    assert spec['encoding']['y']['field'] == 'value'
+
+
+def test_dataframe_box(dataframe, with_plotting_backend):
+    chart = dataframe.plot.box()
+    spec = chart.to_dict()
+    assert spec['mark'] == 'boxplot'
+    assert spec['encoding']['x']['field'] == 'column'
+    assert spec['encoding']['y']['field'] == 'value'
