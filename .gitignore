@@ -104,5 +104,5 @@ venv.bak/
 .mypy_cache/
 
 
-# spceicifc
+# specific
 examples/_matplotlib.ipynb
