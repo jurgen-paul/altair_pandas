@@ -90,6 +90,59 @@ class _DataFramePlotter(_PandasPlotter):
             color=alt.Color('column:N', title=None),
             tooltip=[x] + y_values,
         ).interactive()
+    
+    def area(self, x=None, y=None, **kwargs):
+        if x is None:
+            x = self._data.columns[0]
+        else:
+            assert x in self._data.columns
+        if y is None:
+            y_values = list(self._data.columns[1:])
+        else:
+            assert y in self._data.columns
+            y_values = [y]
+
+        return alt.Chart(self._data).transform_fold(
+            y_values, as_=['column', 'value']
+        ).mark_area().encode(
+            x=x,
+            y=alt.Y('value:Q', title=None),
+            color=alt.Color('column:N', title=None),
+            tooltip=[x] + y_values,
+            opacity=alt.value(kwargs.get('alpha', .5))
+        ).interactive()
+
+    def bar(self, x=None, y=None, **kwargs):
+        if x is None:
+            x = self._data.columns[0]
+        else:
+            assert x in self._data.columns
+        if y is None:
+            y_values = list(self._data.columns[1:])
+        else:
+            assert y in self._data.columns
+            y_values = [y]
+
+        
+
+        chart = alt.Chart(self._data).transform_fold(
+            y_values, as_=['column', 'value']
+        ).mark_bar().encode(
+            x=x,
+            y=alt.Y('value:Q', title=None),
+            color=alt.Color('column:N', title=None),
+            tooltip=[x] + y_values,
+            opacity=alt.value(kwargs.get('alpha', .5)), # NOTE: setup basic config instead
+        ).interactive()
+
+        if len(self._data) <= 12:  # NOTE: arbitrary - for discussion
+            return chart.encode(
+                x=alt.X('column:N', title=None),
+                column=x,
+                opacity=alt.value(kwargs.get('alpha', 1))
+            )
+
+        return chart
 
 
 def plot(data, kind='line', **kwargs):
