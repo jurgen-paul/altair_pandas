@@ -98,6 +98,9 @@ class _DataFramePlotter(_PandasPlotter):
             if isinstance(data.index, pd.MultiIndex):
                 data.index = pd.Index(
                     [str(i) for i in data.index], name=data.index.name)
+
+            if data.index.name is None:
+                data.index.name = 'index'
             return data.reset_index()
         return data
 
@@ -145,7 +148,7 @@ class _DataFramePlotter(_PandasPlotter):
 
             return chart.encode(
                 x=alt.X('column:N', title=None),
-                column=x or self._data.index.name
+                column=x or self._data.index.name or 'index'
             )
 
         return chart
@@ -158,7 +161,7 @@ class _DataFramePlotter(_PandasPlotter):
         if len(self._data) <= CHART_GROUPED_MAX:  
             return chart.encode(
                 y=alt.Y('column:N', title=None),
-                row=x or self._data.index.name
+                row=x or self._data.index.name or 'index'
             )
 
         return chart
