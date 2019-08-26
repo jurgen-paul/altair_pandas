@@ -1,6 +1,7 @@
 import altair as alt
 import pandas as pd
 
+CHART_GROUPED_MAX = 12 # TODO: arbitrary - for discussion
 
 def _valid_column(column_name):
     return str(column_name)
@@ -136,13 +137,30 @@ class _DataFramePlotter(_PandasPlotter):
 
     # TODO: bars should be grouped, not stacked.
     def bar(self, x=None, y=None, **kwargs):
-        return self._xy(
+        
+        chart = self._xy(
             {'type': 'bar', 'orient': 'vertical'}, x, y, **kwargs)
+        
+        if len(self._data) <= CHART_GROUPED_MAX:
+
+            return chart.encode(
+                x=alt.X('column:N', title=None),
+                column=x or self._data.index.name
+            )
+
+        return chart
 
     def barh(self, x=None, y=None, **kwargs):
         chart = self._xy(
             {'type': 'bar', 'orient': 'horizontal'}, x, y, **kwargs)
         chart.encoding.x, chart.encoding.y = chart.encoding.y, chart.encoding.x
+
+        if len(self._data) <= CHART_GROUPED_MAX:  
+            return chart.encode(
+                y=alt.Y('column:N', title=None),
+                row=x or self._data.index.name
+            )
+
         return chart
 
     def scatter(self, x, y, c=None, s=None, **kwargs):
