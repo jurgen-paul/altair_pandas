@@ -6,6 +6,44 @@ def _valid_column(column_name):
     return str(column_name)
 
 
+def _set_encode(chart, cols, value, attribute, types, alt_obj):
+    '''handles all possible meanings/values of the attribute'''
+    if value in cols:
+        setattr(chart.encoding, attribute, alt_obj(value))
+    elif isinstance(value, alt_obj):
+        setattr(chart.encoding, attribute, value)
+    elif isinstance(value, types):
+        setattr(chart.encoding, attribute, alt.value(value))
+    elif isinstance(value, (pd.Series, pd.np.array)):
+        raise NotImplementedError()
+    else:
+        text = f'Supposed to be either column name, or {types}, or {alt_obj} object'  # noqa
+        raise ValueError(text)
+
+
+def _pass_additional_properties(chart, cols, kwargs):
+    '''make use of additional properties, such as
+    color, title, alpha, etc.
+    '''
+    if 'title' in kwargs:
+        chart.title = kwargs['title']
+
+    if 'color' in kwargs:
+        color = kwargs.get('color')
+        _set_encode(chart, cols, color, 'color', str, alt.Color)
+
+    if 'alpha' in kwargs:
+        alpha = kwargs['alpha']
+        _set_encode(chart,
+                    cols,
+                    alpha,
+                    'opacity',
+                    (int, float),
+                    alt.Opacity)
+
+    return chart
+
+
 class _PandasPlotter:
     """Base class for pandas plotting."""
     @classmethod
@@ -198,4 +236,9 @@ def plot(data, kind='line', **kwargs):
         raise NotImplementedError(
             f"kind='{kind}' for data of type {type(data)}")
 
-    return plotfunc(**kwargs)
+    chart = plotfunc(**kwargs)
+    if isinstance(data, pd.DataFrame):
+        cols = data.columns.tolist()
+    else:
+        cols = [data.name, data.index.name]
+    return _pass_additional_properties(chart, cols, kwargs)
