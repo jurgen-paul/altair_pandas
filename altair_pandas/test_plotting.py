@@ -17,27 +17,23 @@ def dataframe():
 def large_dataframe():
     return pd.DataFrame({'x': range(20), 'y': range(20)})
 
+
 @pytest.mark.parametrize('data', [
-    pd.Series(
-        range(6),
-        index=pd.MultiIndex.from_product([['a', 'b', 'c'], [1, 2]])
-    ),
-    pd.DataFrame(
-        {'x': range(6)},
-        index=pd.MultiIndex.from_product([['a', 'b', 'c'], [1, 2]])
-    )
+    pd.Series(range(6),
+              index=pd.MultiIndex.from_product([['a', 'b', 'c'], [1, 2]])),
+    pd.DataFrame({'x': range(6)},
+                 index=pd.MultiIndex.from_product([['a', 'b', 'c'], [1, 2]]))
 ])
 def test_multiindex(data, with_plotting_backend):
     chart = data.plot.bar()
     spec = chart.to_dict()
     assert list(chart.data.iloc[:, 0]) == [str(i) for i in data.index]
     assert spec['encoding']['x']['type'] == 'nominal'
-    
+
     if isinstance(data, pd.Series):
         assert spec['encoding']['x']['field'] == 'index'
     else:
         assert spec['encoding']['x']['field'] == 'column'
-    
 
 
 def test_nonstring_column_names(with_plotting_backend):
@@ -111,7 +107,7 @@ def test_dataframe_large_barh(large_dataframe, with_plotting_backend):
     assert spec['encoding']['x']['field'] == 'value'
     assert spec['encoding']['color']['field'] == 'column'
     assert spec['transform'][0]['fold'] == ['x', 'y']
-    
+
 
 def test_series_scatter_plot(series, with_plotting_backend):
     with pytest.raises(ValueError):
