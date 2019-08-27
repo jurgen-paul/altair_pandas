@@ -13,6 +13,11 @@ def dataframe():
     return pd.DataFrame({'x': range(5), 'y': range(5)})
 
 
+@pytest.fixture
+def large_dataframe():
+    return pd.DataFrame({'x': range(20), 'y': range(20)})
+
+
 @pytest.mark.parametrize('data', [
     pd.Series(
         range(6),
@@ -27,8 +32,12 @@ def test_multiindex(data, with_plotting_backend):
     chart = data.plot.bar()
     spec = chart.to_dict()
     assert list(chart.data.iloc[:, 0]) == [str(i) for i in data.index]
-    assert spec['encoding']['x']['field'] == 'index'
     assert spec['encoding']['x']['type'] == 'nominal'
+
+    if isinstance(data, pd.Series):
+        assert spec['encoding']['x']['field'] == 'index'
+    else:
+        assert spec['encoding']['x']['field'] == 'column'
 
 
 def test_nonstring_column_names(with_plotting_backend):
@@ -65,9 +74,11 @@ def test_dataframe_basic_plot(dataframe, kind, with_plotting_backend):
     spec = chart.to_dict()
     if kind == 'bar':
         assert spec['mark'] == {'type': 'bar', 'orient': 'vertical'}
+        assert spec['encoding']['x']['field'] == 'column'
     else:
         assert spec['mark'] == kind
-    assert spec['encoding']['x']['field'] == 'index'
+        assert spec['encoding']['x']['field'] == 'index'
+
     assert spec['encoding']['y']['field'] == 'value'
     assert spec['encoding']['color']['field'] == 'column'
     assert spec['transform'][0]['fold'] == ['x', 'y']
@@ -83,6 +94,17 @@ def test_series_barh(series, with_plotting_backend):
 
 def test_dataframe_barh(dataframe, with_plotting_backend):
     chart = dataframe.plot.barh()
+    spec = chart.to_dict()
+    assert spec['mark'] == {'type': 'bar', 'orient': 'horizontal'}
+    assert spec['encoding']['y']['field'] == 'column'
+    assert spec['encoding']['x']['field'] == 'value'
+    assert spec['encoding']['color']['field'] == 'column'
+    assert spec['transform'][0]['fold'] == ['x', 'y']
+    assert spec['encoding']['row']['field'] == 'index'
+
+
+def test_dataframe_large_barh(large_dataframe, with_plotting_backend):
+    chart = large_dataframe.plot.barh()
     spec = chart.to_dict()
     assert spec['mark'] == {'type': 'bar', 'orient': 'horizontal'}
     assert spec['encoding']['y']['field'] == 'index'
