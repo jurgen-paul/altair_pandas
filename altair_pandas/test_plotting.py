@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import altair as alt
 
+
 @pytest.fixture
 def series():
     return pd.Series(range(5), name='data_name')
@@ -144,11 +145,13 @@ def test_dataframe_boxplot(dataframe, with_plotting_backend):
 
 
 @pytest.mark.parametrize('props', [
-    {'title':'Test Title', 'color': 'y', 'alpha': 0.2},
-    {'title':'Test Title', 'color': 'purple', 'alpha': 'y'},
-    {'title':'Test Title', 'color': 'purple', 'alpha': 'y'},
-    {'title':'Test Title', 'color': 'purple', 'alpha': 'y'},
-    {'title': 'Test Title', 'color':alt.Color('y', scale=alt.Scale(scheme='viridis')), 'alpha':0.2}
+    {'title': 'Test Title', 'color': 'y', 'alpha': 0.2},
+    {'title': 'Test Title', 'color': 'purple', 'alpha': 'y'},
+    {'title': 'Test Title', 'color': 'purple', 'alpha': 'y'},
+    {'title': 'Test Title', 'color': 'purple', 'alpha': 'y'},
+    {'title': 'Test Title',
+     'color': alt.Color('y', scale=alt.Scale(scheme='viridis')),
+     'alpha': 0.2}
     ])
 def test_additional_properties(dataframe, props, with_plotting_backend):
     chart = dataframe.plot.barh(**props)
@@ -159,11 +162,13 @@ def test_additional_properties(dataframe, props, with_plotting_backend):
     if props['alpha'] == 0.2:
         assert spec['encoding']['opacity'] == alt.value(props['alpha'])
     else:
-        assert spec['encoding']['opacity'] == {'field': props['alpha'], 'type': 'quantitative'}
+        assert spec['encoding']['opacity'] == {'field': props['alpha'],
+                                               'type': 'quantitative'}
 
     if props['color'] == 'purple':
         assert spec['encoding']['color'] == alt.value(props['color'])
     elif isinstance(props['color'], alt.Color):
         assert spec['encoding']['color'] == props['color'].to_dict()
     else:
-        assert spec['encoding']['color'] == {'field': props['color'], 'type': 'quantitative'}
+        assert spec['encoding']['color'] == {'field': props['color'],
+                                             'type': 'quantitative'}
