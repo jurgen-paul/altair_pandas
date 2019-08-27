@@ -106,3 +106,4 @@ venv.bak/
 
  # specific
 examples/_matplotlib.ipynb
+.vscode/*
