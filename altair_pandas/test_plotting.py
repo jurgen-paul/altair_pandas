@@ -19,10 +19,14 @@ def large_dataframe():
 
 
 @pytest.mark.parametrize('data', [
-    pd.Series(range(6),
-              index=pd.MultiIndex.from_product([['a', 'b', 'c'], [1, 2]])),
-    pd.DataFrame({'x': range(6)},
-                 index=pd.MultiIndex.from_product([['a', 'b', 'c'], [1, 2]]))
+    pd.Series(
+        range(6),
+        index=pd.MultiIndex.from_product([['a', 'b', 'c'], [1, 2]])
+    ),
+    pd.DataFrame(
+        {'x': range(6)},
+        index=pd.MultiIndex.from_product([['a', 'b', 'c'], [1, 2]])
+    )
 ])
 def test_multiindex(data, with_plotting_backend):
     chart = data.plot.bar()

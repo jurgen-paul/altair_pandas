@@ -33,8 +33,8 @@ class _SeriesPlotter(_PandasPlotter):
         if with_index:
             if isinstance(data.index, pd.MultiIndex):
                 data = data.copy()
-                data.index = pd.Index([str(i) for i in data.index],
-                                      name=data.index.name)
+                data.index = pd.Index(
+                    [str(i) for i in data.index], name=data.index.name)
             data = data.reset_index()
         else:
             data = data.to_frame()
@@ -46,7 +46,8 @@ class _SeriesPlotter(_PandasPlotter):
         return alt.Chart(data, mark=mark).encode(
             x=alt.X(data.columns[0], title=None),
             y=alt.Y(data.columns[1], title=None),
-            tooltip=list(data.columns)).interactive()
+            tooltip=list(data.columns)
+        ).interactive()
 
     def line(self, **kwargs):
         return self._xy('line', **kwargs)
@@ -75,13 +76,12 @@ class _SeriesPlotter(_PandasPlotter):
 
     def box(self, **kwargs):
         data = self._preprocess_data(with_index=False)
-        return alt.Chart(data).transform_fold(list(data.columns),
-                                              as_=['column', 'value'
-                                                   ]).mark_boxplot().encode(
-                                                       x=alt.X('column:N',
-                                                               title=None),
-                                                       y='value:Q',
-                                                   )
+        return alt.Chart(data).transform_fold(
+            list(data.columns), as_=['column', 'value']
+        ).mark_boxplot().encode(
+            x=alt.X('column:N', title=None),
+            y='value:Q',
+        )
 
 
 class _DataFramePlotter(_PandasPlotter):
@@ -97,8 +97,8 @@ class _DataFramePlotter(_PandasPlotter):
             data = data[usecols]
         if with_index:
             if isinstance(data.index, pd.MultiIndex):
-                data.index = pd.Index([str(i) for i in data.index],
-                                      name=data.index.name)
+                data.index = pd.Index(
+                    [str(i) for i in data.index], name=data.index.name)
 
             if data.index.name is None:
                 data.index.name = 'index'
@@ -121,13 +121,17 @@ class _DataFramePlotter(_PandasPlotter):
             assert y in data.columns
             y_values = [y]
 
-        return alt.Chart(data, mark=mark).transform_fold(
-            y_values, as_=['column', 'value']).encode(
-                x=x,
-                y=alt.Y('value:Q', title=None),
-                color=alt.Color('column:N', title=None),
-                tooltip=[x] + y_values,
-            ).interactive()
+        return alt.Chart(
+            data,
+            mark=mark
+        ).transform_fold(
+            y_values, as_=['column', 'value']
+        ).encode(
+            x=x,
+            y=alt.Y('value:Q', title=None),
+            color=alt.Color('column:N', title=None),
+            tooltip=[x] + y_values,
+        ).interactive()
 
     def line(self, x=None, y=None, **kwargs):
         return self._xy('line', x, y, **kwargs)
@@ -138,25 +142,28 @@ class _DataFramePlotter(_PandasPlotter):
     # TODO: bars should be grouped, not stacked.
     def bar(self, x=None, y=None, **kwargs):
 
-        chart = self._xy({'type': 'bar', 'orient': 'vertical'}, x, y, **kwargs)
+        chart = self._xy(
+            {'type': 'bar', 'orient': 'vertical'}, x, y, **kwargs)
 
         if len(self._data) <= CHART_GROUPED_MAX:
 
-            return chart.encode(x=alt.X('column:N', title=None),
-                                column=x or self._data.index.name or 'index')
+            return chart.encode(
+                x=alt.X('column:N', title=None),
+                column=x or self._data.index.name or 'index'
+            )
 
         return chart
 
     def barh(self, x=None, y=None, **kwargs):
-        chart = self._xy({
-            'type': 'bar',
-            'orient': 'horizontal'
-        }, x, y, **kwargs)
+        chart = self._xy(
+            {'type': 'bar', 'orient': 'horizontal'}, x, y, **kwargs)
         chart.encoding.x, chart.encoding.y = chart.encoding.y, chart.encoding.x
 
         if len(self._data) <= CHART_GROUPED_MAX:
-            return chart.encode(y=alt.Y('column:N', title=None),
-                                row=x or self._data.index.name or 'index')
+            return chart.encode(
+                y=alt.Y('column:N', title=None),
+                row=x or self._data.index.name or 'index'
+            )
 
         return chart
 
@@ -171,30 +178,28 @@ class _DataFramePlotter(_PandasPlotter):
         columns = list(set(encodings.values()))
         data = self._preprocess_data(with_index=False, usecols=columns)
         encodings['tooltip'] = columns
-        return alt.Chart(data).mark_point().encode(**encodings).interactive()
+        return alt.Chart(data).mark_point().encode(
+            **encodings
+        ).interactive()
 
     def hist(self, **kwargs):
         data = self._preprocess_data(with_index=False)
         return alt.Chart(data).transform_fold(
-            list(data.columns),
-            as_=['column',
-                 'value']).mark_bar().encode(x=alt.X('value:Q',
-                                                     title=None,
-                                                     bin=True),
-                                             y=alt.Y('count()',
-                                                     title='Frequency',
-                                                     stack=None),
-                                             color=alt.Color('column:N'))
+            list(data.columns), as_=['column', 'value']
+        ).mark_bar().encode(
+            x=alt.X('value:Q', title=None, bin=True),
+            y=alt.Y('count()', title='Frequency', stack=None),
+            color=alt.Color('column:N')
+        )
 
     def box(self, **kwargs):
         data = self._preprocess_data(with_index=False)
-        return alt.Chart(data).transform_fold(list(data.columns),
-                                              as_=['column', 'value'
-                                                   ]).mark_boxplot().encode(
-                                                       x=alt.X('column:N',
-                                                               title=None),
-                                                       y='value:Q',
-                                                   )
+        return alt.Chart(data).transform_fold(
+            list(data.columns), as_=['column', 'value']
+        ).mark_boxplot().encode(
+            x=alt.X('column:N', title=None),
+            y='value:Q',
+        )
 
 
 def plot(data, kind='line', **kwargs):
