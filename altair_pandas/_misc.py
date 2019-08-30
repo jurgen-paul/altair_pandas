@@ -12,9 +12,22 @@ def scatter_matrix(
 ):
     """ plots a scatter matrix
 
-    at the moment does not support neither histogram nor kde;
-    Uses f-f scatterplots instead
+    At the moment does not support neither histogram nor kde;
+    Uses f-f scatterplots instead. Interactive and with a cusotmizable
+    tooltip
 
+    Parameters
+    ----------
+    df : DataFame
+        DataFame to be used for scatterplot. Only numeric columns will be included.
+    color : string or iterable [optional]
+        Can be a column name, specific color value (hex, webcolors), or an array
+        of values to be used.
+    alpha : float
+        Opacity of the markers, within [0,1]
+    tooltip: list [optional]
+        List of specific column names or alt.Tooltip objects. If none (default),
+        will show all columns.
     """
     dfc = df.copy()  # otherwise passing array will be preserved
     cols = dfc._get_numeric_data().columns.astype(str).tolist()
