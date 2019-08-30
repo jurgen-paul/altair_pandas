@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 import pandas as pd
+import altair as alt
 
 
 @pytest.fixture
@@ -227,3 +228,51 @@ def test_dataframe_area(dataframe, stacked, with_plotting_backend):
     for k, v in {"x": "index", "y": "value", "color": "column"}.items():
         assert spec["encoding"][k]["field"] == v
     assert spec["transform"][0]["fold"] == ["x", "y"]
+
+
+@pytest.mark.parametrize("alpha", [1.0, 0.2])
+@pytest.mark.parametrize("color", [None, "x", range(5)])
+@pytest.mark.parametrize(
+    "tooltip",
+    [
+        None,
+        ["x", "y"],
+        [alt.Tooltip("x", format="$.2f"), alt.Tooltip("y", format=".0%")],
+    ],
+)
+def test_scatter_matrix(dataframe, alpha, color, tooltip, with_plotting_backend):
+    from altair_pandas import scatter_matrix
+
+    chart = scatter_matrix(dataframe, alpha=alpha, color=color, tooltip=tooltip)
+    spec = chart.to_dict()
+
+    cols = dataframe._get_numeric_data().columns.astype(str).tolist()
+    for k, v in spec["repeat"].items():
+        assert set(v) == set(cols)
+
+    if color is None:
+        assert "color" not in spec["spec"]["encoding"]
+    elif color == "x":
+        assert spec["spec"]["encoding"]["color"] == {
+            "type": "quantitative",
+            "field": "x",
+        }
+    else:
+        assert spec["spec"]["encoding"]["color"] == {
+            "type": "quantitative",
+            "field": "color",
+        }
+
+    assert spec["spec"]["encoding"]["opacity"] == {"value": alpha}
+
+    if tooltip is None:
+        assert set(el["field"] for el in spec["spec"]["encoding"]["tooltip"]) == {
+            "x",
+            "y",
+        }
+    else:
+        assert len(spec["spec"]["encoding"]["tooltip"]) == 2
+        assert set(el["field"] for el in spec["spec"]["encoding"]["tooltip"]) == {
+            "x",
+            "y",
+        }
