@@ -220,7 +220,8 @@ def test_series_mark_properties(series, kind, with_plotting_backend):
 def test_dataframe_area(dataframe, stacked, with_plotting_backend):
     chart = dataframe.plot.area(stacked=stacked)
     spec = chart.to_dict()
-    mark = "area" if stacked else {"type": "area", "line": True, "opacity": 0.5}
+    mark = {"type": "area"} if stacked else {
+        "type": "area", "line": True, "opacity": 0.5}
     assert spec["mark"] == mark
     for k, v in {"x": "index", "y": "value", "color": "column"}.items():
         assert spec["encoding"][k]["field"] == v
