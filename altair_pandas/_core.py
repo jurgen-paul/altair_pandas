@@ -230,6 +230,12 @@ class _DataFramePlotter(_PandasPlotter):
         if s is not None:
             encodings["size"] = _valid_column(s)
         columns = list(set(encodings.values()))
+        if kwargs.get("colormap"):
+            if c is None:
+                raise ValueError("'c' should be defined for using 'colormap'")
+            encodings["color"] = alt.Color(
+                encodings["color"], scale=alt.Scale(scheme=kwargs.get("colormap"))
+            )
         data = self._preprocess_data(with_index=False, usecols=columns)
         encodings["tooltip"] = columns
         mark = self._get_mark_def("point", kwargs)
