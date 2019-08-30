@@ -1,5 +1,4 @@
 import altair as alt
-import pandas as pd
 from typing import Iterable, Union, List
 
 toltipList = List[alt.Tooltip]
@@ -15,7 +14,7 @@ def scatter_matrix(
 
     at the moment does not support neither histogram nor kde;
     Uses f-f scatterplots instead
-    
+
     """
     dfc = df.copy()  # otherwise passing array will be preserved
     cols = dfc._get_numeric_data().columns.astype(str).tolist()
