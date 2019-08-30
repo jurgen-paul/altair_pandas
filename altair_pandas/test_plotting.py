@@ -211,17 +211,18 @@ def test_dataframe_mark_properties(dataframe, kind, with_plotting_backend):
 def test_series_mark_properties(series, kind, with_plotting_backend):
     chart = series.plot(kind=kind, alpha=0.5, color="red")
     spec = chart.to_dict()
-    assert spec['mark']['type'] == _expected_mark(kind)
-    assert spec['mark']['opacity'] == 0.5
-    assert spec['mark']['color'] == 'red'
+    assert spec["mark"]["type"] == _expected_mark(kind)
+    assert spec["mark"]["opacity"] == 0.5
+    assert spec["mark"]["color"] == "red"
 
 
 @pytest.mark.parametrize("stacked", [True, False])
 def test_dataframe_area(dataframe, stacked, with_plotting_backend):
     chart = dataframe.plot.area(stacked=stacked)
     spec = chart.to_dict()
-    mark = {"type": "area"} if stacked else {
-        "type": "area", "line": True, "opacity": 0.5}
+    mark = (
+        {"type": "area"} if stacked else {"type": "area", "line": True, "opacity": 0.5}
+    )
     assert spec["mark"] == mark
     for k, v in {"x": "index", "y": "value", "color": "column"}.items():
         assert spec["encoding"][k]["field"] == v
