@@ -160,7 +160,7 @@ def test_dataframe_hist(dataframe, bins, stacked, orientation, with_plotting_bac
 def test_series_boxplot(series, vert, with_plotting_backend):
     chart = series.plot.box(vert=vert)
     spec = chart.to_dict()
-    assert spec["mark"] == "boxplot"
+    assert spec["mark"]["type"] == "boxplot"
     assert spec["transform"][0]["fold"] == ["data_name"]
     fields = ["column", "value"] if vert else ["value", "column"]
     assert spec["encoding"]["x"]["field"] == fields[0]
@@ -171,7 +171,7 @@ def test_series_boxplot(series, vert, with_plotting_backend):
 def test_dataframe_boxplot(dataframe, vert, with_plotting_backend):
     chart = dataframe.plot.box(vert=vert)
     spec = chart.to_dict()
-    assert spec["mark"] == "boxplot"
+    assert spec["mark"]["type"] == "boxplot"
     assert spec["transform"][0]["fold"] == ["x", "y"]
     fields = ["column", "value"] if vert else ["value", "column"]
     assert spec["encoding"]["x"]["field"] == fields[0]

@@ -147,9 +147,8 @@ class _SeriesPlotter(_PandasPlotter):
     def box(self, vert=True, **kwargs):
         data = self._preprocess_data(with_index=False)
         chart = (
-            alt.Chart(data)
+            alt.Chart(data, mark=self._get_mark_def("boxplot", kwargs))
             .transform_fold(list(data.columns), as_=["column", "value"])
-            .mark_boxplot()
             .encode(x=alt.X("column:N", title=None), y="value:Q")
         )
         if not vert:
@@ -277,9 +276,8 @@ class _DataFramePlotter(_PandasPlotter):
     def box(self, vert=True, **kwargs):
         data = self._preprocess_data(with_index=False)
         chart = (
-            alt.Chart(data)
+            alt.Chart(data, mark=self._get_mark_def("boxplot", kwargs))
             .transform_fold(list(data.columns), as_=["column", "value"])
-            .mark_boxplot()
             .encode(x=alt.X("column:N", title=None), y="value:Q")
         )
         if not vert:
