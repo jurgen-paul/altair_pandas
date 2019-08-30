@@ -1,9 +1,8 @@
-from ._core import hist, scatterplot
 import altair as alt
 import pandas as pd
 
 
-def scatter_matrix(df, alpha: float = 0.2, diagonal: str = "kde"):
+def scatter_matrix(df, alpha: float = 0.2):
     """ plots a scatter matrix
 
     at the moment does not support neither histogram nor kde;

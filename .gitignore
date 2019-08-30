@@ -102,10 +102,14 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+<<<<<<< HEAD
 
 
 # vscode
 .vscode/
 
 #examples
+=======
+.vscode/settings.json
+>>>>>>> removed imports
 examples/*.ipynb
