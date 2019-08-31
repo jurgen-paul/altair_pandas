@@ -237,11 +237,13 @@ def test_dataframe_area(dataframe, stacked, with_plotting_backend):
     [
         None,
         ["x", "y"],
-        [alt.Tooltip("x", format="$.2f"), alt.Tooltip("y", format=".0%")],
+        [alt.Tooltip("x", format="$.2f"), alt.Tooltip("z", format=".0%")],
     ],
 )
 def test_scatter_matrix(dataframe, alpha, color, tooltip, with_plotting_backend):
     from altair_pandas import scatter_matrix
+
+    dataframe["z"] = ["A", "B", "C", "D", "E"]
 
     chart = scatter_matrix(dataframe, alpha=alpha, color=color, tooltip=tooltip)
     spec = chart.to_dict()
@@ -269,10 +271,18 @@ def test_scatter_matrix(dataframe, alpha, color, tooltip, with_plotting_backend)
         assert set(el["field"] for el in spec["spec"]["encoding"]["tooltip"]) == {
             "x",
             "y",
+            "z",
         }
-    else:
+    elif tooltip == ["x", "y"]:
         assert len(spec["spec"]["encoding"]["tooltip"]) == 2
         assert set(el["field"] for el in spec["spec"]["encoding"]["tooltip"]) == {
             "x",
             "y",
         }
+    else:
+        assert len(spec["spec"]["encoding"]["tooltip"]) == 2
+        assert set(el["field"] for el in spec["spec"]["encoding"]["tooltip"]) == {
+            "x",
+            "z",
+        }
+        assert spec["spec"]["encoding"]["tooltip"][0]["format"] == "$.2f"
