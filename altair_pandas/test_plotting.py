@@ -286,3 +286,18 @@ def test_scatter_matrix(dataframe, alpha, color, tooltip, with_plotting_backend)
             "z",
         }
         assert spec["spec"]["encoding"]["tooltip"][0]["format"] == "$.2f"
+
+
+def test_scatter_matrix_column_overlap(dataframe, with_plotting_backend):
+    from altair_pandas import scatter_matrix
+
+    dataframe["__color__"] = ["red"] * 5
+    color_col = range(5)
+
+    chart = scatter_matrix(dataframe, color=color_col)
+    spec = chart.to_dict()
+
+    assert spec["spec"]["encoding"]["color"] == {
+        "type": "quantitative",
+        "field": "__color___",
+    }
