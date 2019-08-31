@@ -260,7 +260,7 @@ def test_scatter_matrix(dataframe, alpha, color, tooltip, with_plotting_backend)
     else:
         assert spec["spec"]["encoding"]["color"] == {
             "type": "quantitative",
-            "field": "color",
+            "field": "__color__",
         }
 
     assert spec["spec"]["encoding"]["opacity"] == {"value": alpha}

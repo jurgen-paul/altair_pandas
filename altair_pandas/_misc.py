@@ -41,8 +41,17 @@ def scatter_matrix(
         else:
             color = alt.value(color)
     elif hasattr(color, "__len__") and len(color) == len(df):
-        dfc["color"] = color
-        color = "color"
+        allcols = set(dfc.columns.astype(str))
+        colname = "__color__"
+
+        while True:
+            if colname in allcols:
+                colname += "_"
+            else:
+                break
+
+        dfc[colname] = color
+        color = colname
     else:
         raise ValueError(color)
 
