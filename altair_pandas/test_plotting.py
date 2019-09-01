@@ -294,10 +294,5 @@ def test_scatter_matrix_column_overlap(dataframe, with_plotting_backend):
     dataframe["__color__"] = ["red"] * 5
     color_col = range(5)
 
-    chart = scatter_matrix(dataframe, color=color_col)
-    spec = chart.to_dict()
-
-    assert spec["spec"]["encoding"]["color"] == {
-        "type": "quantitative",
-        "field": "__color___",
-    }
+    with pytest.raises(ValueError):
+        chart = scatter_matrix(dataframe, color=color_col)
