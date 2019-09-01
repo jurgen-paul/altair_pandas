@@ -296,3 +296,14 @@ def test_scatter_matrix_column_overlap(dataframe, with_plotting_backend):
 
     with pytest.raises(ValueError):
         chart = scatter_matrix(dataframe, color=color_col)
+
+
+@pytest.mark.parametrize("colormap", ["viridis", "goldgreen"])
+@pytest.mark.parametrize("color", ["x", range(5)])
+def test_scatter_colormap(dataframe, colormap, color, with_plotting_backend):
+    from altair_pandas import scatter_matrix
+
+    chart = scatter_matrix(dataframe, color=color, colormap=colormap)
+    spec = chart.to_dict()
+
+    assert spec["spec"]["encoding"]["color"]["scale"]["scheme"] == colormap
