@@ -231,7 +231,7 @@ def test_dataframe_area(dataframe, stacked, with_plotting_backend):
 
 
 @pytest.mark.parametrize("alpha", [1.0, 0.2])
-@pytest.mark.parametrize("color", [None, "x", range(5)])
+@pytest.mark.parametrize("color", [None, "x", "z"])
 @pytest.mark.parametrize(
     "tooltip",
     [
@@ -259,11 +259,6 @@ def test_scatter_matrix(dataframe, alpha, color, tooltip, with_plotting_backend)
             "type": "quantitative",
             "field": "x",
         }
-    else:
-        assert spec["spec"]["encoding"]["color"] == {
-            "type": "quantitative",
-            "field": "__color__",
-        }
 
     assert spec["spec"]["encoding"]["opacity"] == {"value": alpha}
 
@@ -288,20 +283,13 @@ def test_scatter_matrix(dataframe, alpha, color, tooltip, with_plotting_backend)
         assert spec["spec"]["encoding"]["tooltip"][0]["format"] == "$.2f"
 
 
-def test_scatter_matrix_column_overlap(dataframe, with_plotting_backend):
-    from altair_pandas import scatter_matrix
-
-    dataframe["__color__"] = ["red"] * 5
-    color_col = range(5)
-
-    with pytest.raises(ValueError):
-        scatter_matrix(dataframe, color=color_col)
-
-
 @pytest.mark.parametrize("colormap", ["viridis", "goldgreen"])
-@pytest.mark.parametrize("color", ["x", range(5)])
+@pytest.mark.parametrize("color", ["x", "z"])
 def test_scatter_colormap(dataframe, colormap, color, with_plotting_backend):
     from altair_pandas import scatter_matrix
+
+    if color == "z":
+        dataframe["z"] = ["A", "B", "C", "D", "E"]
 
     chart = scatter_matrix(dataframe, color=color, colormap=colormap)
     spec = chart.to_dict()

@@ -1,12 +1,12 @@
 import altair as alt
-from typing import Iterable, Union, List
+from typing import Union, List
 
 toltipList = List[alt.Tooltip]
 
 
 def scatter_matrix(
     df,
-    color: Union[str, Iterable, None] = None,
+    color: Union[str, None] = None,
     alpha: float = 1.0,
     tooltip: Union[List[str], toltipList, None] = None,
     **kwargs
@@ -21,9 +21,8 @@ def scatter_matrix(
     ----------
     df : DataFame
         DataFame to be used for scatterplot. Only numeric columns will be included.
-    color : string or iterable [optional]
-        Can be a column name, specific color value (hex, webcolors), or an array
-        of values to be used.
+    color : string [optional]
+        Can be a column name or specific color value (hex, webcolors).
     alpha : float
         Opacity of the markers, within [0,1]
     tooltip: list [optional]
@@ -44,17 +43,6 @@ def scatter_matrix(
                 pass
         else:
             color = alt.value(color)
-    elif hasattr(color, "__len__") and len(color) == len(df):
-        colname = "__color__"
-
-        if colname in dfc.columns.astype(str):
-            raise ValueError("Column `__color__` already exists")
-        dfc[colname] = color
-
-        if "colormap" in kwargs:
-            color = alt.Color(colname, scale=alt.Scale(scheme=kwargs.get("colormap")))
-        else:
-            color = colname
     else:
         raise ValueError(color)
 
