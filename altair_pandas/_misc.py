@@ -1,5 +1,5 @@
 import altair as alt
-from typing import Iterable, Union, List, Optional
+from typing import Iterable, Union, List
 
 toltipList = List[alt.Tooltip]
 

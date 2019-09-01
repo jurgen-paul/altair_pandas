@@ -295,7 +295,7 @@ def test_scatter_matrix_column_overlap(dataframe, with_plotting_backend):
     color_col = range(5)
 
     with pytest.raises(ValueError):
-        chart = scatter_matrix(dataframe, color=color_col)
+        scatter_matrix(dataframe, color=color_col)
 
 
 @pytest.mark.parametrize("colormap", ["viridis", "goldgreen"])
