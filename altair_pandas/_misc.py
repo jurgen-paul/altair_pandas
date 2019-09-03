@@ -29,22 +29,8 @@ def scatter_matrix(
         List of specific column names or alt.Tooltip objects. If none (default),
         will show all columns.
     """
-    dfc = df.copy()  # otherwise passing array will be preserved
-    cols = dfc._get_numeric_data().columns.astype(str).tolist()
-    tooltip = tooltip or dfc.columns.astype(str).tolist()
-
-    if color is None:
-        pass
-    elif isinstance(color, str):
-        if color in df.columns.astype(str).tolist():
-            if "colormap" in kwargs:
-                color = alt.Color(color, scale=alt.Scale(scheme=kwargs.get("colormap")))
-            else:
-                pass
-        else:
-            color = alt.value(color)
-    else:
-        raise ValueError(color)
+    dfc = df.rename(columns=str).copy()  # otherwise passing array will be preserved
+    cols = dfc._get_numeric_data().columns.tolist()
 
     chart = (
         alt.Chart(dfc)
@@ -53,12 +39,20 @@ def scatter_matrix(
             x=alt.X(alt.repeat("column"), type="quantitative"),
             y=alt.X(alt.repeat("row"), type="quantitative"),
             opacity=alt.value(alpha),
-            tooltip=tooltip,
+            tooltip=tooltip or dfc.columns.tolist(),
         )
         .properties(width=150, height=150)
     )
 
     if color:
+        color = str(color)
+
+        if color in dfc:
+            color = alt.Color(color)
+            if "colormap" in kwargs:
+                color.scale = alt.Scale(scheme=kwargs.get("colormap"))
+        else:
+            color = alt.value(color)
         chart = chart.encode(color=color)
 
-    return chart.repeat(row=cols, column=cols[::-1]).interactive()
+    return chart.repeat(row=cols, column=cols).interactive()
