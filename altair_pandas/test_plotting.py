@@ -295,3 +295,30 @@ def test_scatter_colormap(dataframe, colormap, color, with_plotting_backend):
     spec = chart.to_dict()
 
     assert spec["spec"]["encoding"]["color"]["scale"]["scheme"] == colormap
+
+
+@pytest.mark.parametrize(
+    "indx, data",
+    {
+        "index": pd.DataFrame(
+            {"x": range(6)}, index=pd.MultiIndex.from_product([["a", "b", "c"], [1, 2]])
+        ),
+        "columns": pd.DataFrame(
+            {"x": range(6)}, index=pd.MultiIndex.from_product([["a", "b", "c"], [1, 2]])
+        ).T,
+    }.items(),
+)
+def test_scatter_multiindex(indx, data, with_plotting_backend):
+    from altair_pandas import scatter_matrix
+
+    chart = scatter_matrix(data)
+    spec = chart.to_dict()
+
+    cols = (
+        {"x"}
+        if indx == "index"
+        else ({"('b', 2)", "('b', 1)", "('c', 2)", "('a', 2)", "('c', 1)", "('a', 1)"})
+    )
+
+    for k, v in spec["repeat"].items():
+        assert set(v) == cols

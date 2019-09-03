@@ -1,7 +1,22 @@
 import altair as alt
 from typing import Union, List
+import pandas as pd
 
 toltipList = List[alt.Tooltip]
+
+
+def _preprocess_data(data):
+    for indx in ("index", "columns"):
+        if isinstance(getattr(data, indx), pd.MultiIndex):
+            setattr(
+                data,
+                indx,
+                pd.Index(
+                    [str(i) for i in getattr(data, indx)], name=getattr(data, indx).name
+                ),
+            )
+    # Column names must all be strings.
+    return data.rename(columns=str).copy()
 
 
 def scatter_matrix(
@@ -29,7 +44,7 @@ def scatter_matrix(
         List of specific column names or alt.Tooltip objects. If none (default),
         will show all columns.
     """
-    dfc = df.rename(columns=str).copy()  # otherwise passing array will be preserved
+    dfc = _preprocess_data(df)
     cols = dfc._get_numeric_data().columns.tolist()
 
     chart = (
