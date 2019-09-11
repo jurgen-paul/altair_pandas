@@ -2,7 +2,7 @@ import altair as alt
 from typing import Union, List
 import pandas as pd
 
-toltipList = List[alt.Tooltip]
+tooltipList = List[alt.Tooltip]
 
 
 def _preprocess_data(data):
@@ -19,13 +19,21 @@ def _preprocess_data(data):
     return data.rename(columns=str).copy()
 
 
+def _process_tooltip(tooltip):
+    """converts tooltip els to string if needed"""
+    if isinstance(tooltip, list) and not isinstance(tooltip[0], alt.Tooltip):
+        tooltip = [str(el) for el in tooltip]
+
+    return tooltip
+
+
 def scatter_matrix(
     df,
     color: Union[str, None] = None,
     alpha: float = 1.0,
-    tooltip: Union[List[str], toltipList, None] = None,
+    tooltip: Union[List[str], tooltipList, None] = None,
     **kwargs
-):
+) -> alt.Chart:
     """ plots a scatter matrix
 
     At the moment does not support neither histogram nor kde;
@@ -45,6 +53,7 @@ def scatter_matrix(
         will show all columns.
     """
     dfc = _preprocess_data(df)
+    tooltip = _process_tooltip(tooltip) or dfc.columns.tolist()
     cols = dfc._get_numeric_data().columns.tolist()
 
     chart = (
@@ -54,7 +63,7 @@ def scatter_matrix(
             x=alt.X(alt.repeat("column"), type="quantitative"),
             y=alt.X(alt.repeat("row"), type="quantitative"),
             opacity=alt.value(alpha),
-            tooltip=tooltip or dfc.columns.tolist(),
+            tooltip=tooltip,
         )
         .properties(width=150, height=150)
     )
