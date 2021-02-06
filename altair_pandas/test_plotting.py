@@ -369,3 +369,8 @@ def test_kde(data, bw_method, bandwidth, ind, steps):
 def test_kde_warns_callable_bw_method(dataframe):
     with pytest.warns(UserWarning):
         dataframe.plot(kind="kde", bw_method=lambda data: 0)
+
+
+def test_kde_warns_array_ind(series):
+    with pytest.warns(UserWarning):
+        series.plot(kind="kde", ind=np.arange(5))
