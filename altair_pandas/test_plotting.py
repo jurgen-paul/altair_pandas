@@ -381,3 +381,10 @@ def test_set_color_kde(series):
     chart = series.plot(kind="kde", color=mark_color)
     spec = chart.to_dict()
     assert spec["mark"]["color"] == mark_color
+
+
+def test_set_alpha_kde(dataframe):
+    alpha = 0.2
+    chart = dataframe.plot(kind="kde", alpha=alpha)
+    spec = chart.to_dict()
+    assert spec["mark"]["opacity"] == alpha
