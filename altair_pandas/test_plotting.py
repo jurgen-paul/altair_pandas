@@ -374,3 +374,10 @@ def test_kde_warns_callable_bw_method(dataframe):
 def test_kde_warns_array_ind(series):
     with pytest.warns(UserWarning):
         series.plot(kind="kde", ind=np.arange(5))
+
+
+def test_set_color_kde(series):
+    mark_color = "#6300EE"
+    chart = series.plot(kind="kde", color=mark_color)
+    spec = chart.to_dict()
+    assert spec["mark"]["color"] == mark_color
