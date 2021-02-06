@@ -1,3 +1,5 @@
+import warnings
+
 import altair as alt
 import pandas as pd
 import numpy as np
@@ -68,6 +70,64 @@ class _PandasPlotter:
         if isinstance(kwargs.get("color"), str):
             mark["color"] = kwargs.pop("color")
         return mark
+
+    def _kde(self, data, bw_method=None, ind=None, **kwargs):
+        if bw_method == "scott" or bw_method is None:
+            bandwidth = 0
+        elif bw_method == "silverman":
+            # Implimentation taken from
+            # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
+            n = data.shape[0]
+            d = 1
+            bandwidth = (n * (d + 2) / 4.0) ** (-1.0 / (d + 4))
+        elif callable(bw_method):
+            if 1 < data.shape[1]:
+                warnings.warn(
+                    "Using a callable argument for ind using the Altair"
+                    " plotting backend sets the bandwidth for all"
+                    " columns",
+                    category=UserWarning,
+                )
+            bandwidth = bw_method(data)
+        else:
+            bandwidth = bw_method
+
+        if ind is None:
+            steps = 1_000
+        elif isinstance(ind, np.ndarray):
+            warnings.warn(
+                "The Altair plotting backend does not support sequences" " for ind",
+                category=UserWarning,
+            )
+            steps = 1_000
+        else:
+            steps = ind
+
+        chart = (
+            alt.Chart(data, mark=self._get_mark_def("area", kwargs))
+            .transform_fold(
+                data.columns.to_numpy(),
+                as_=["Measurement_type", "value"],
+            )
+            .transform_density(
+                density="value",
+                bandwidth=bandwidth,
+                groupby=["Measurement_type"],
+                # Manually setting domain to min and max makes kde look
+                # more uniform
+                extent=[data.min().min(), data.max().max()],
+                steps=steps,
+            )
+            .encode(
+                x=alt.X("value:Q"),
+                y=alt.Y("density:Q", stack="zero"),
+            )
+        )
+        # If there is only one column, do not encode color so that user
+        # can pass optional color kwarg into mark
+        if 1 < data.shape[1]:
+            chart.encode(color=alt.Color("Measurement_type:N"))
+        return chart
 
 
 class _SeriesPlotter(_PandasPlotter):
