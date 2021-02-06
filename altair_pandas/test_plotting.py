@@ -364,3 +364,8 @@ def test_kde(data, bw_method, bandwidth, ind, steps):
     ]
     assert density_attributes["groupby"] == ["Measurement_type"]
     assert density_attributes["steps"] == steps
+
+
+def test_kde_warns_callable_bw_method(dataframe):
+    with pytest.warns(UserWarning):
+        dataframe.plot(kind="kde", bw_method=lambda data: 0)
