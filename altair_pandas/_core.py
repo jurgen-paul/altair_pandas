@@ -75,7 +75,7 @@ class _PandasPlotter:
         if bw_method == "scott" or bw_method is None:
             bandwidth = 0
         elif bw_method == "silverman":
-            # Implimentation taken from
+            # Implementation taken from
             # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
             n = data.shape[0]
             d = 1
