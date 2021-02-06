@@ -367,6 +367,10 @@ class _DataFramePlotter(_PandasPlotter):
             chart.encoding.x, chart.encoding.y = chart.encoding.y, chart.encoding.x
         return chart
 
+    def kde(self, bw_method=None, ind=None, **kwargs):
+        data = self._preprocess_data(with_index=False)
+        return self._kde(data, bw_method=bw_method, ind=ind, **kwargs)
+
 
 def plot(data, kind="line", **kwargs):
     """Pandas plotting interface for Altair."""
