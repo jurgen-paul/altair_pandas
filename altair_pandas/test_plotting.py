@@ -332,3 +332,35 @@ def test_scatter_multiindex(indx, data, with_plotting_backend):
 
     for k, v in spec["repeat"].items():
         assert set(v) == cols
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        pd.DataFrame({"a": np.arange(12), "b": np.arange(12, 24)}),
+        pd.DataFrame({"a": np.arange(12)}),
+        pd.Series(np.arange(12)),
+    ],
+)
+@pytest.mark.parametrize(
+    "bw_method, bandwidth",
+    [
+        (None, 0),
+        ("scott", 0),
+        ("silverman", 0.6443940149772542),
+        (lambda data: 0.3, 0.3),
+    ],
+)
+@pytest.mark.parametrize("ind, steps", [(None, 1_000), (500, 500)])
+def test_kde(data, bw_method, bandwidth, ind, steps):
+    chart = data.plot(kind="kde", bw_method=bw_method, ind=ind)
+    spec = chart.to_dict()
+
+    density_attributes = spec["transform"][1]
+    assert density_attributes["bandwidth"] == pytest.approx(bandwidth)
+    assert density_attributes["extent"] == [
+        data.to_numpy().min(),
+        data.to_numpy().max(),
+    ]
+    assert density_attributes["groupby"] == ["Measurement_type"]
+    assert density_attributes["steps"] == steps
