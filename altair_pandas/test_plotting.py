@@ -409,3 +409,31 @@ def test_hexbin(dataframe, gridsize):
     assert encoding["y"]["bin"]["step"] == pytest.approx(y_step)
     assert encoding["color"]["field"] == "x"
     assert encoding["color"]["aggregate"] == "count"
+
+
+@pytest.mark.parametrize(
+    "reduce_C_function, first_color_value",
+    [
+        (None, 1.5),
+        (np.max, 3),
+        (np.sum, 6),
+    ],
+)
+def test_hexbin_C(reduce_C_function, first_color_value):
+    dataframe = pd.DataFrame(
+        {"x": np.arange(20), "y": np.arange(20, 40), "C": np.arange(20)}
+    )
+    chart = dataframe.plot(
+        kind="hexbin",
+        x="x",
+        y="y",
+        C="C",
+        reduce_C_function=reduce_C_function,
+        gridsize=5,
+    )
+    spec = chart.to_dict()
+
+    dataset = spec["datasets"]
+    assert dataset[list(dataset.keys())[0]][0]["C"] == first_color_value
+    assert spec["encoding"]["color"]["aggregate"] == "median"
+    assert spec["encoding"]["color"]["title"] == "C"
