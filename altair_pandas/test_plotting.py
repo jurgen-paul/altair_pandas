@@ -437,3 +437,13 @@ def test_hexbin_C(reduce_C_function, first_color_value):
     assert dataset[list(dataset.keys())[0]][0]["C"] == first_color_value
     assert spec["encoding"]["color"]["aggregate"] == "median"
     assert spec["encoding"]["color"]["title"] == "C"
+
+
+def test_hexbin_C_equals_x(dataframe):
+    chart = dataframe.plot(
+        kind="hexbin", x="x", y="y", C="x", reduce_C_function=lambda df: 1
+    )
+    spec = chart.to_dict()
+
+    dataset = spec["datasets"]
+    assert dataset[list(dataset.keys())[0]][0]["reduced_x"] == 1
