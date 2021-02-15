@@ -119,8 +119,8 @@ class _PandasPlotter:
                 steps=steps,
             )
             .encode(
-                x=alt.X("value:Q"),
-                y=alt.Y("density:Q", stack="zero"),
+                x=alt.X("value", type="quantitative"),
+                y=alt.Y("density", type="quantitative", stack="zero"),
             )
         )
         # If there is only one column, do not encode color so that user
