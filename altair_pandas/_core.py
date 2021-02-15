@@ -107,12 +107,12 @@ class _PandasPlotter:
             alt.Chart(data, mark=self._get_mark_def("area", kwargs))
             .transform_fold(
                 data.columns.to_numpy(),
-                as_=["Measurement_type", "value"],
+                as_=["Column", "value"],
             )
             .transform_density(
                 density="value",
                 bandwidth=bandwidth,
-                groupby=["Measurement_type"],
+                groupby=["Column"],
                 # Manually setting domain to min and max makes kde look
                 # more uniform
                 extent=[data.min().min(), data.max().max()],
