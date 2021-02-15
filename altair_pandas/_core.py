@@ -371,6 +371,78 @@ class _DataFramePlotter(_PandasPlotter):
         data = self._preprocess_data(with_index=False)
         return self._kde(data, bw_method=bw_method, ind=ind, **kwargs)
 
+    def hexbin(self, x, y, C=None, reduce_C_function=None, gridsize=None, **kwargs):
+        data = self._preprocess_data(with_index=False)
+
+        if np.iterable(gridsize):
+            x_bins, y_bins = gridsize
+        else:
+            x_bins = 100 if gridsize is None else gridsize
+            # Since rectangles are being used here,
+            # instead of hexagons like in Matplotlib,
+            # set default y_bins equal to x_bins
+            y_bins = x_bins
+
+        x_step = (data[x].max() - data[x].min()) / x_bins
+        y_step = (data[y].max() - data[y].min()) / y_bins
+
+        # Default set to bluegreen to match Matplotlib's default
+        color_scheme = kwargs.pop("cmap", "bluegreen")
+
+        if C is not None:
+            reduce_C_function = (
+                np.mean if reduce_C_function is None else reduce_C_function
+            )
+            # Make sure column is not overwritten if C is one
+            # of the coordinate columns
+            color_shorthand = C if C not in (x, y) else f"reduced_{C}"
+            data[color_shorthand] = data.groupby(
+                [
+                    pd.cut(data[x], bins=x_bins),
+                    pd.cut(data[y], bins=y_bins),
+                ]
+            )[C].transform(reduce_C_function)
+            # All reduced values will be identical across rows that
+            # belong to the same bin
+            # Since the median of a collection of identical values is
+            # the value itself, the median is used here as a way to pass
+            # the reduced value per bin to Altair
+            color_aggregate = "median"
+            color_title = C
+        else:
+            color_shorthand = x
+            color_aggregate = "count"
+            color_title = "Count"
+
+        chart = (
+            alt.Chart(data)
+            .mark_rect(**kwargs)
+            .encode(
+                x=alt.X(x, bin=alt.Bin(step=x_step)),
+                y=alt.Y(y, bin=alt.Bin(step=y_step)),
+                color=alt.Color(
+                    color_shorthand,
+                    aggregate=color_aggregate,
+                    scale=alt.Scale(scheme=color_scheme),
+                    title=color_title,
+                    type="quantitative",
+                ),
+                tooltip=[
+                    alt.Tooltip(x, bin=alt.Bin(step=x_step), type="quantitative"),
+                    alt.Tooltip(y, bin=alt.Bin(step=y_step), type="quantitative"),
+                    alt.Tooltip(
+                        color_shorthand,
+                        aggregate=color_aggregate,
+                        title=color_title,
+                        type="quantitative",
+                    ),
+                ],
+            )
+            .interactive()
+        )
+
+        return chart
+
 
 def plot(data, kind="line", **kwargs):
     """Pandas plotting interface for Altair."""
