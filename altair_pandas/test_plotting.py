@@ -447,3 +447,10 @@ def test_hexbin_C_equals_x(dataframe):
 
     dataset = spec["datasets"]
     assert dataset[list(dataset.keys())[0]][0]["reduced_x"] == 1
+
+
+def test_hexbin_cmap(dataframe):
+    chart = dataframe.plot(kind="hexbin", x="x", y="y", cmap="blue")
+    spec = chart.to_dict()
+
+    assert spec["encoding"]["color"]["scale"]["scheme"] == "blue"
