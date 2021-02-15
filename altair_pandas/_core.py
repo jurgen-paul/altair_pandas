@@ -127,6 +127,7 @@ class _PandasPlotter:
                     alt.Tooltip("Column", type="nominal"),
                 ],
             )
+            .interactive()
         )
         # If there is only one column, do not encode color so that user
         # can pass optional color kwarg into mark
