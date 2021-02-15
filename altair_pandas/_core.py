@@ -126,7 +126,7 @@ class _PandasPlotter:
         # If there is only one column, do not encode color so that user
         # can pass optional color kwarg into mark
         if 1 < data.shape[1]:
-            chart.encode(color=alt.Color("Measurement_type:N"))
+            chart = chart.encode(color=alt.Color("Column", type="nominal"))
         return chart
 
 
