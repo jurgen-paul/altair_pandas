@@ -364,6 +364,8 @@ def test_kde(data, bw_method, bandwidth, ind, steps):
     ]
     assert density_attributes["groupby"] == ["Column"]
     assert density_attributes["steps"] == steps
+    if 1 < len(data.shape) and 1 < data.shape[1]:
+        assert spec["encoding"]["color"]["field"] == "Column"
 
 
 def test_kde_warns_callable_bw_method(dataframe):
