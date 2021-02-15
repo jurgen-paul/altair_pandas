@@ -121,6 +121,11 @@ class _PandasPlotter:
             .encode(
                 x=alt.X("value", type="quantitative"),
                 y=alt.Y("density", type="quantitative", stack="zero"),
+                tooltip=[
+                    alt.Tooltip("value", type="quantitative"),
+                    alt.Tooltip("density", type="quantitative"),
+                    alt.Tooltip("Column", type="nominal"),
+                ],
             )
         )
         # If there is only one column, do not encode color so that user
