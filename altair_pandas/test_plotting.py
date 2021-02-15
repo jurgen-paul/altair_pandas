@@ -362,7 +362,7 @@ def test_kde(data, bw_method, bandwidth, ind, steps):
         data.to_numpy().min(),
         data.to_numpy().max(),
     ]
-    assert density_attributes["groupby"] == ["Measurement_type"]
+    assert density_attributes["groupby"] == ["Column"]
     assert density_attributes["steps"] == steps
 
 
