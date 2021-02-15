@@ -388,3 +388,24 @@ def test_set_alpha_kde(dataframe):
     chart = dataframe.plot(kind="kde", alpha=alpha)
     spec = chart.to_dict()
     assert spec["mark"]["opacity"] == alpha
+
+
+@pytest.mark.parametrize("gridsize", [None, 10, (5, 15)])
+def test_hexbin(dataframe, gridsize):
+    chart = dataframe.plot(kind="hexbin", x="x", y="y", gridsize=gridsize)
+    spec = chart.to_dict()
+
+    if np.iterable(gridsize):
+        x_bins, y_bins = gridsize
+    else:
+        x_bins = 100 if gridsize is None else gridsize
+        y_bins = x_bins
+
+    x_step = (dataframe["x"].max() - dataframe["y"].min()) / x_bins
+    y_step = (dataframe["y"].max() - dataframe["y"].min()) / y_bins
+
+    encoding = spec["encoding"]
+    assert encoding["x"]["bin"]["step"] == pytest.approx(x_step)
+    assert encoding["y"]["bin"]["step"] == pytest.approx(y_step)
+    assert encoding["color"]["field"] == "x"
+    assert encoding["color"]["aggregate"] == "count"
