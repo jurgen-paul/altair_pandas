@@ -107,26 +107,32 @@ class _PandasPlotter:
             alt.Chart(data, mark=self._get_mark_def("area", kwargs))
             .transform_fold(
                 data.columns.to_numpy(),
-                as_=["Measurement_type", "value"],
+                as_=["Column", "value"],
             )
             .transform_density(
                 density="value",
                 bandwidth=bandwidth,
-                groupby=["Measurement_type"],
+                groupby=["Column"],
                 # Manually setting domain to min and max makes kde look
                 # more uniform
                 extent=[data.min().min(), data.max().max()],
                 steps=steps,
             )
             .encode(
-                x=alt.X("value:Q"),
-                y=alt.Y("density:Q", stack="zero"),
+                x=alt.X("value", type="quantitative"),
+                y=alt.Y("density", type="quantitative", stack="zero"),
+                tooltip=[
+                    alt.Tooltip("value", type="quantitative"),
+                    alt.Tooltip("density", type="quantitative"),
+                    alt.Tooltip("Column", type="nominal"),
+                ],
             )
+            .interactive()
         )
         # If there is only one column, do not encode color so that user
         # can pass optional color kwarg into mark
         if 1 < data.shape[1]:
-            chart.encode(color=alt.Color("Measurement_type:N"))
+            chart = chart.encode(color=alt.Color("Column", type="nominal"))
         return chart
 
 
