@@ -388,3 +388,69 @@ def test_set_alpha_kde(dataframe):
     chart = dataframe.plot(kind="kde", alpha=alpha)
     spec = chart.to_dict()
     assert spec["mark"]["opacity"] == alpha
+
+
+@pytest.mark.parametrize("gridsize", [None, 10, (5, 15)])
+def test_hexbin(dataframe, gridsize):
+    chart = dataframe.plot(kind="hexbin", x="x", y="y", gridsize=gridsize)
+    spec = chart.to_dict()
+
+    if np.iterable(gridsize):
+        x_bins, y_bins = gridsize
+    else:
+        x_bins = 100 if gridsize is None else gridsize
+        y_bins = x_bins
+
+    x_step = (dataframe["x"].max() - dataframe["y"].min()) / x_bins
+    y_step = (dataframe["y"].max() - dataframe["y"].min()) / y_bins
+
+    encoding = spec["encoding"]
+    assert encoding["x"]["bin"]["step"] == pytest.approx(x_step)
+    assert encoding["y"]["bin"]["step"] == pytest.approx(y_step)
+    assert encoding["color"]["field"] == "x"
+    assert encoding["color"]["aggregate"] == "count"
+
+
+@pytest.mark.parametrize(
+    "reduce_C_function, first_color_value",
+    [
+        (None, 1.5),
+        (np.max, 3),
+        (np.sum, 6),
+    ],
+)
+def test_hexbin_C(reduce_C_function, first_color_value):
+    dataframe = pd.DataFrame(
+        {"x": np.arange(20), "y": np.arange(20, 40), "C": np.arange(20)}
+    )
+    chart = dataframe.plot(
+        kind="hexbin",
+        x="x",
+        y="y",
+        C="C",
+        reduce_C_function=reduce_C_function,
+        gridsize=5,
+    )
+    spec = chart.to_dict()
+
+    dataset = spec["datasets"]
+    assert dataset[list(dataset.keys())[0]][0]["C"] == first_color_value
+    assert spec["encoding"]["color"]["aggregate"] == "median"
+    assert spec["encoding"]["color"]["title"] == "C"
+
+
+def test_hexbin_C_equals_x(dataframe):
+    chart = dataframe.plot(
+        kind="hexbin", x="x", y="y", C="x", reduce_C_function=lambda df: 1
+    )
+    spec = chart.to_dict()
+
+    dataset = spec["datasets"]
+    assert dataset[list(dataset.keys())[0]][0]["reduced_x"] == 1
+
+
+def test_hexbin_cmap(dataframe):
+    chart = dataframe.plot(kind="hexbin", x="x", y="y", cmap="blue")
+    spec = chart.to_dict()
+
+    assert spec["encoding"]["color"]["scale"]["scheme"] == "blue"
