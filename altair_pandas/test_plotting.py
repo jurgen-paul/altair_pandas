@@ -536,3 +536,11 @@ def test_boxplot_figsize(dataframe, with_plotting_backend):
     assert view["continuousWidth"] == 500
     assert view["discreteHeight"] == 300
     assert view["discreteWidth"] == 500
+
+
+def test_boxplot_layout(with_plotting_backend):
+    df = pd.DataFrame(np.random.randn(10, 3), columns=["Col1", "Col2", "Col3"])
+    df["X"] = pd.Series(["A", "A", "A", "A", "A", "B", "B", "B", "B", "B"])
+    chart = df.boxplot(by="X", layout=(3, 1))
+
+    assert chart.to_dict()["columns"] == 1
