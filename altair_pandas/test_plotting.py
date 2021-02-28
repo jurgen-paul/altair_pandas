@@ -456,3 +456,15 @@ def test_hexbin_cmap(dataframe):
     spec = chart.to_dict()
 
     assert spec["encoding"]["color"]["scale"]["scheme"] == "blue"
+
+
+def test_boxplot(dataframe, with_plotting_backend):
+    chart = dataframe.boxplot()
+    spec = chart.to_dict()
+    encoding = spec["encoding"]
+
+    assert spec["mark"] == "boxplot"
+    assert encoding["x"]["field"] == "Column"
+    assert encoding["x"]["type"] == "nominal"
+    assert encoding["y"]["field"] == "Value"
+    assert encoding["y"]["type"] == "quantitative"
