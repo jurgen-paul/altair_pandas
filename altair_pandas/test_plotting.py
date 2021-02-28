@@ -184,7 +184,7 @@ def test_dataframe_boxplot(dataframe, vert, with_plotting_backend):
     spec = chart.to_dict()
     assert spec["mark"] == "boxplot"
     assert spec["transform"][0]["fold"] == ["x", "y"]
-    fields = ["column", "value"] if vert else ["value", "column"]
+    fields = ["Column", "Value"] if vert else ["Value", "Column"]
     assert spec["encoding"]["x"]["field"] == fields[0]
     assert spec["encoding"]["y"]["field"] == fields[1]
 
@@ -544,3 +544,8 @@ def test_boxplot_layout(with_plotting_backend):
     chart = df.boxplot(by="X", layout=(3, 1))
 
     assert chart.to_dict()["columns"] == 1
+
+
+def test_boxplot_warn_return_type(dataframe, with_plotting_backend):
+    with pytest.warns(UserWarning):
+        dataframe.boxplot(return_type="dict")
