@@ -468,3 +468,22 @@ def test_boxplot(dataframe, with_plotting_backend):
     assert encoding["x"]["type"] == "nominal"
     assert encoding["y"]["field"] == "Value"
     assert encoding["y"]["type"] == "quantitative"
+
+
+@pytest.mark.parametrize(
+    "column, fold",
+    [
+        (None, ["Col1", "Col2", "Col3"]),
+        ("Col1", ["Col1"]),
+        ("Col2", ["Col2"]),
+        (["Col1", "Col3"], ["Col1", "Col3"]),
+    ],
+)
+def test_boxplot_column(column, fold, with_plotting_backend):
+    df = pd.DataFrame(np.random.randn(10, 3), columns=["Col1", "Col2", "Col3"])
+    df["X"] = pd.Series(["A", "A", "A", "A", "A", "B", "B", "B", "B", "B"])
+    df["Y"] = pd.Series(["A", "B", "A", "B", "A", "B", "A", "B", "A", "B"])
+    chart = df.boxplot(column=column)
+    spec = chart.to_dict()
+
+    assert spec["transform"][0]["fold"] == fold
