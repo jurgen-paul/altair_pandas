@@ -377,16 +377,118 @@ class _DataFramePlotter(_PandasPlotter):
             .repeat(repeat=list(data.columns), columns=ncols)
         )
 
-    def box(self, vert=True, **kwargs):
+    def box(
+        self,
+        vert=True,
+        column=None,
+        by=None,
+        fontsize=None,
+        rot=0,
+        grid=True,
+        figsize=None,
+        layout=None,
+        return_type=None,
+        **kwargs,
+    ):
         data = self._preprocess_data(with_index=False)
+
+        if column is not None:
+            columns = [column] if isinstance(column, str) else column
+        else:
+            columns = data.select_dtypes(np.number).columns
+            if by is not None:
+                columns = columns.difference(pd.Index(list(by)))
+
+        if by is not None:
+            if np.iterable(by) and not isinstance(by, str) and 1 < len(by):
+                by_identifier = ", ".join(by)
+                by_title = f"[{by_identifier}]"
+                # Check that name doesn't overlap with existing
+                # columns
+                # If it does, assign a unique name
+                by_column = (
+                    by_identifier if by_identifier not in columns else "".join(columns)
+                )
+                data[by_column] = data[by].apply(
+                    lambda row: f"({', '.join(row)})", axis=1
+                )
+                panels = data[by_column].nunique()
+            else:
+                by = by.pop() if not isinstance(by, str) else by
+                panels = data[by].nunique()
+                by_title = by
+                by_column = by
+            x_column = by_column
+            x_title = by_title
+        else:
+            panels = 1
+            x_column = "Column"
+            x_title = None
+
+        mark_args = {
+            kwarg: value
+            for kwarg, value in kwargs.items()
+            if kwarg in {"alpha", "color"}
+        }
+
+        # Matplotlib measures counterclockwise, while Vega-Lite measures
+        # clockwise
+        # Convert counterclockwise to clockwise
+        label_angle = 360 - rot
+
+        if return_type is not None:
+            warnings.warn(
+                "Different return types are not implimented for the" " Altair backend.",
+                category=UserWarning,
+            )
+
+        _, n_columns = _get_layout(panels, layout=layout)
+
         chart = (
             alt.Chart(data)
-            .transform_fold(list(data.columns), as_=["column", "value"])
-            .mark_boxplot()
-            .encode(x=alt.X("column:N", title=None), y="value:Q")
+            .transform_fold(list(columns), as_=["Column", "Value"])
+            .mark_boxplot(**mark_args)
+            .encode(
+                x=alt.X(
+                    x_column,
+                    title=x_title,
+                    type="nominal",
+                    axis=alt.Axis(labelAngle=label_angle, grid=grid),
+                ),
+                y=alt.Y("Value", type="quantitative", axis=alt.Axis(grid=grid)),
+                tooltip=[
+                    alt.Tooltip(x_column, title=x_title, type="nominal"),
+                    alt.Tooltip("Value", type="quantitative"),
+                ],
+            )
+            .interactive()
         )
+
         if not vert:
             chart.encoding.x, chart.encoding.y = chart.encoding.y, chart.encoding.x
+
+        if by is not None:
+            chart = chart.facet(
+                facet=alt.Facet("Column", title=None, type="nominal"),
+                columns=n_columns,
+            ).properties(title=f"Boxplot grouped by {by}")
+
+        if fontsize is not None:
+            size = _get_fontsize(fontsize) if isinstance(fontsize, str) else fontsize
+            chart = chart.configure_axis(
+                labelFontSize=size,
+                titleFontSize=size,
+            )
+
+        if figsize is not None:
+            width, height = figsize
+            chart = chart.configure_view(
+                continuousHeight=height,
+                discreteHeight=height,
+                continuousWidth=width,
+                discreteWidth=width,
+            )
+
         return chart
 
     def kde(self, bw_method=None, ind=None, **kwargs):
