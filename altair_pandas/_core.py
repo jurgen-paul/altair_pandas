@@ -438,7 +438,7 @@ class _DataFramePlotter(_PandasPlotter):
 
         if return_type is not None:
             warnings.warn(
-                "Different return types are not implimented for the" " Altair backend.",
+                "Different return types are not implimented for the Altair backend.",
                 category=UserWarning,
             )
 
@@ -586,3 +586,28 @@ def hist_frame(data, **kwargs):
 
 def hist_series(data, **kwargs):
     return _PandasPlotter.create(data).hist_series(**kwargs)
+
+
+def boxplot_frame(
+    data,
+    column=None,
+    by=None,
+    fontsize=None,
+    rot=0,
+    grid=True,
+    figsize=None,
+    layout=None,
+    return_type=None,
+    **kwargs,
+):
+    return _PandasPlotter.create(data).box(
+        column=column,
+        by=by,
+        fontsize=fontsize,
+        rot=rot,
+        grid=grid,
+        figsize=figsize,
+        layout=layout,
+        return_type=return_type,
+        **kwargs,
+    )
