@@ -524,3 +524,15 @@ def test_boxplot_grid(dataframe, with_plotting_backend):
 
     assert encoding["x"]["axis"]["grid"] is False
     assert encoding["y"]["axis"]["grid"] is False
+
+
+def test_boxplot_figsize(dataframe, with_plotting_backend):
+    width = 500
+    height = 300
+    chart = dataframe.boxplot(figsize=(width, height))
+    view = chart.to_dict()["config"]["view"]
+
+    assert view["continuousHeight"] == 300
+    assert view["continuousWidth"] == 500
+    assert view["discreteHeight"] == 300
+    assert view["discreteWidth"] == 500
