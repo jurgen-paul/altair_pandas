@@ -10,6 +10,22 @@ def _valid_column(column_name):
     return str(column_name)
 
 
+def _get_fontsize(size_name):
+    """Return a fontsize based on matplotlib labels."""
+    font_sizes = {
+        "xx-small": 5.79,
+        "x-small": 6.94,
+        "small": 8.33,
+        "medium": 10.0,
+        "large": 12.0,
+        "x-large": 14.4,
+        "xx-large": 17.28,
+        "larger": 12.0,
+        "smaller": 8.33,
+    }
+    return font_sizes[size_name]
+
+
 def _get_layout(panels, layout=None):
     """Compute the layout for a gridded chart.
 
