@@ -508,3 +508,11 @@ def test_boxplot_fontsize(dataframe, with_plotting_backend):
 
     assert axis["labelFontSize"] == 100
     assert axis["titleFontSize"] == 100
+
+
+def test_boxplot_rot(dataframe, with_plotting_backend):
+    rot = 45
+    chart = dataframe.boxplot(rot=rot)
+    x_encoding = chart["encoding"]["x"]
+
+    assert x_encoding["axis"]["labelAngle"] == 360 - rot
