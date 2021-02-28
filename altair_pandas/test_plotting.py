@@ -516,3 +516,11 @@ def test_boxplot_rot(dataframe, with_plotting_backend):
     x_encoding = chart["encoding"]["x"]
 
     assert x_encoding["axis"]["labelAngle"] == 360 - rot
+
+
+def test_boxplot_grid(dataframe, with_plotting_backend):
+    chart = dataframe.boxplot(grid=False)
+    encoding = chart.to_dict()["encoding"]
+
+    assert encoding["x"]["axis"]["grid"] is False
+    assert encoding["y"]["axis"]["grid"] is False
