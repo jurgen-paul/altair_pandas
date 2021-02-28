@@ -487,3 +487,24 @@ def test_boxplot_column(column, fold, with_plotting_backend):
     spec = chart.to_dict()
 
     assert spec["transform"][0]["fold"] == fold
+
+
+@pytest.mark.parametrize("by, field", [("X", "X"), ("Y", "Y"), (["X", "Y"], "X, Y")])
+def test_boxplot_by(by, field, with_plotting_backend):
+    df = pd.DataFrame(np.random.randn(10, 3), columns=["Col1", "Col2", "Col3"])
+    df["X"] = pd.Series(["A", "A", "A", "A", "A", "B", "B", "B", "B", "B"])
+    df["Y"] = pd.Series(["A", "B", "A", "B", "A", "B", "A", "B", "A", "B"])
+    chart = df.boxplot(by=by)
+    spec = chart.to_dict()
+
+    assert spec["facet"]["field"] == "Column"
+    assert spec["spec"]["encoding"]["x"]["field"] == field
+
+
+def test_boxplot_fontsize(dataframe, with_plotting_backend):
+    fontsize = 100
+    chart = dataframe.boxplot(fontsize=fontsize)
+    axis = chart.to_dict()["config"]["axis"]
+
+    assert axis["labelFontSize"] == 100
+    assert axis["titleFontSize"] == 100
