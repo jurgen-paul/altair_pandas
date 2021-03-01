@@ -352,7 +352,7 @@ def test_scatter_multiindex(indx, data, with_plotting_backend):
     ],
 )
 @pytest.mark.parametrize("ind, steps", [(None, 1_000), (500, 500)])
-def test_kde(data, bw_method, bandwidth, ind, steps):
+def test_kde(data, bw_method, bandwidth, ind, steps, with_plotting_backend):
     chart = data.plot(kind="kde", bw_method=bw_method, ind=ind)
     spec = chart.to_dict()
 
@@ -368,7 +368,7 @@ def test_kde(data, bw_method, bandwidth, ind, steps):
         assert spec["encoding"]["color"]["field"] == "Column"
 
 
-def test_kde_warns_callable_bw_method(dataframe):
+def test_kde_warns_callable_bw_method(dataframe, with_plotting_backend):
     with pytest.warns(UserWarning):
         dataframe.plot(kind="kde", bw_method=lambda data: 0)
 
@@ -378,14 +378,14 @@ def test_kde_warns_array_ind(series):
         series.plot(kind="kde", ind=np.arange(5))
 
 
-def test_set_color_kde(series):
+def test_set_color_kde(series, with_plotting_backend):
     mark_color = "#6300EE"
     chart = series.plot(kind="kde", color=mark_color)
     spec = chart.to_dict()
     assert spec["mark"]["color"] == mark_color
 
 
-def test_set_alpha_kde(dataframe):
+def test_set_alpha_kde(dataframe, with_plotting_backend):
     alpha = 0.2
     chart = dataframe.plot(kind="kde", alpha=alpha)
     spec = chart.to_dict()
@@ -393,7 +393,7 @@ def test_set_alpha_kde(dataframe):
 
 
 @pytest.mark.parametrize("gridsize", [None, 10, (5, 15)])
-def test_hexbin(dataframe, gridsize):
+def test_hexbin(dataframe, gridsize, with_plotting_backend):
     chart = dataframe.plot(kind="hexbin", x="x", y="y", gridsize=gridsize)
     spec = chart.to_dict()
 
@@ -421,7 +421,7 @@ def test_hexbin(dataframe, gridsize):
         (np.sum, 6),
     ],
 )
-def test_hexbin_C(reduce_C_function, first_color_value):
+def test_hexbin_C(reduce_C_function, first_color_value, with_plotting_backend):
     dataframe = pd.DataFrame(
         {"x": np.arange(20), "y": np.arange(20, 40), "C": np.arange(20)}
     )
@@ -441,7 +441,7 @@ def test_hexbin_C(reduce_C_function, first_color_value):
     assert spec["encoding"]["color"]["title"] == "C"
 
 
-def test_hexbin_C_equals_x(dataframe):
+def test_hexbin_C_equals_x(dataframe, with_plotting_backend):
     chart = dataframe.plot(
         kind="hexbin", x="x", y="y", C="x", reduce_C_function=lambda df: 1
     )
@@ -451,7 +451,7 @@ def test_hexbin_C_equals_x(dataframe):
     assert dataset[list(dataset.keys())[0]][0]["reduced_x"] == 1
 
 
-def test_hexbin_cmap(dataframe):
+def test_hexbin_cmap(dataframe, with_plotting_backend):
     chart = dataframe.plot(kind="hexbin", x="x", y="y", cmap="blue")
     spec = chart.to_dict()
 
