@@ -184,7 +184,7 @@ def test_dataframe_boxplot(dataframe, vert, with_plotting_backend):
     spec = chart.to_dict()
     assert spec["mark"] == "boxplot"
     assert spec["transform"][0]["fold"] == ["x", "y"]
-    fields = ["column", "value"] if vert else ["value", "column"]
+    fields = ["Column", "Value"] if vert else ["Value", "Column"]
     assert spec["encoding"]["x"]["field"] == fields[0]
     assert spec["encoding"]["y"]["field"] == fields[1]
 
@@ -456,3 +456,96 @@ def test_hexbin_cmap(dataframe, with_plotting_backend):
     spec = chart.to_dict()
 
     assert spec["encoding"]["color"]["scale"]["scheme"] == "blue"
+
+
+def test_boxplot(dataframe, with_plotting_backend):
+    chart = dataframe.boxplot()
+    spec = chart.to_dict()
+    encoding = spec["encoding"]
+
+    assert spec["mark"] == "boxplot"
+    assert encoding["x"]["field"] == "Column"
+    assert encoding["x"]["type"] == "nominal"
+    assert encoding["y"]["field"] == "Value"
+    assert encoding["y"]["type"] == "quantitative"
+
+
+@pytest.mark.parametrize(
+    "column, fold",
+    [
+        (None, ["Col1", "Col2", "Col3"]),
+        ("Col1", ["Col1"]),
+        ("Col2", ["Col2"]),
+        (["Col1", "Col3"], ["Col1", "Col3"]),
+    ],
+)
+def test_boxplot_column(column, fold, with_plotting_backend):
+    df = pd.DataFrame(np.random.randn(10, 3), columns=["Col1", "Col2", "Col3"])
+    df["X"] = pd.Series(["A", "A", "A", "A", "A", "B", "B", "B", "B", "B"])
+    df["Y"] = pd.Series(["A", "B", "A", "B", "A", "B", "A", "B", "A", "B"])
+    chart = df.boxplot(column=column)
+    spec = chart.to_dict()
+
+    assert spec["transform"][0]["fold"] == fold
+
+
+@pytest.mark.parametrize("by, field", [("X", "X"), ("Y", "Y"), (["X", "Y"], "X, Y")])
+def test_boxplot_by(by, field, with_plotting_backend):
+    df = pd.DataFrame(np.random.randn(10, 3), columns=["Col1", "Col2", "Col3"])
+    df["X"] = pd.Series(["A", "A", "A", "A", "A", "B", "B", "B", "B", "B"])
+    df["Y"] = pd.Series(["A", "B", "A", "B", "A", "B", "A", "B", "A", "B"])
+    chart = df.boxplot(by=by)
+    spec = chart.to_dict()
+
+    assert spec["facet"]["field"] == "Column"
+    assert spec["spec"]["encoding"]["x"]["field"] == field
+
+
+def test_boxplot_fontsize(dataframe, with_plotting_backend):
+    fontsize = 100
+    chart = dataframe.boxplot(fontsize=fontsize)
+    axis = chart.to_dict()["config"]["axis"]
+
+    assert axis["labelFontSize"] == 100
+    assert axis["titleFontSize"] == 100
+
+
+def test_boxplot_rot(dataframe, with_plotting_backend):
+    rot = 45
+    chart = dataframe.boxplot(rot=rot)
+    x_encoding = chart["encoding"]["x"]
+
+    assert x_encoding["axis"]["labelAngle"] == 360 - rot
+
+
+def test_boxplot_grid(dataframe, with_plotting_backend):
+    chart = dataframe.boxplot(grid=False)
+    encoding = chart.to_dict()["encoding"]
+
+    assert encoding["x"]["axis"]["grid"] is False
+    assert encoding["y"]["axis"]["grid"] is False
+
+
+def test_boxplot_figsize(dataframe, with_plotting_backend):
+    width = 500
+    height = 300
+    chart = dataframe.boxplot(figsize=(width, height))
+    view = chart.to_dict()["config"]["view"]
+
+    assert view["continuousHeight"] == 300
+    assert view["continuousWidth"] == 500
+    assert view["discreteHeight"] == 300
+    assert view["discreteWidth"] == 500
+
+
+def test_boxplot_layout(with_plotting_backend):
+    df = pd.DataFrame(np.random.randn(10, 3), columns=["Col1", "Col2", "Col3"])
+    df["X"] = pd.Series(["A", "A", "A", "A", "A", "B", "B", "B", "B", "B"])
+    chart = df.boxplot(by="X", layout=(3, 1))
+
+    assert chart.to_dict()["columns"] == 1
+
+
+def test_boxplot_warn_return_type(dataframe, with_plotting_backend):
+    with pytest.warns(UserWarning):
+        dataframe.boxplot(return_type="dict")
